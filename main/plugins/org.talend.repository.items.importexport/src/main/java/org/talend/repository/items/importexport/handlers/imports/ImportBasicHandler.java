@@ -826,8 +826,14 @@ public class ImportBasicHandler extends AbstractImportExecutableHandler {
                     restoreFolderItem(folderItem); // restore the parent folders from recycle bin.
                 }
 
-                // reset the path, especially for win os with case insensitive.
-                path = new Path(folderItem.getState().getPath()).append(folderItem.getProperty().getLabel());
+                String pathStr = folderItem.getState().getPath();
+                if (pathStr == null) {
+                    pathStr = ""; //$NON-NLS-1$
+                }
+                if (!path.isEmpty()) {
+                    // if have path, reset the path, especially for win os with case insensitive.
+                    path = new Path(pathStr).append(folderItem.getProperty().getLabel());
+                }// else{ // if root path "", keep it, and folderItem will be root node of type.
             }
             repFactory.createParentFoldersRecursively(ProjectManager.getInstance().getCurrentProject(), curItemType, path, true);
         } catch (Exception e) {
