@@ -89,6 +89,7 @@ import org.talend.core.ui.context.model.table.ContextTableConstants;
 import org.talend.core.ui.context.model.table.ContextTableTabParentModel;
 import org.talend.core.ui.context.nattableTree.ContextNatTableBackGroudPainter;
 import org.talend.core.ui.context.nattableTree.ContextNatTableConfiguration;
+import org.talend.core.ui.context.nattableTree.ContextNatTableUtils;
 import org.talend.core.ui.context.nattableTree.ContextParaModeChangeMenuConfiguration;
 import org.talend.core.ui.context.nattableTree.ContextRowDataListFixture;
 import org.talend.core.ui.context.nattableTree.ContextTextPainter;
@@ -119,12 +120,15 @@ public class ContextTreeTable {
     // by default sort by the model id
     private final static String TREE_CONTEXT_ID = "orderId";
 
-    public ContextTreeTable() {
+    private IContextModelManager manager;
+
+    public ContextTreeTable(IContextModelManager manager) {
+        this.manager = manager;
     }
 
-    public TControl createTable(Composite parentContainer, IContextModelManager manager,
-            List<ContextTableTabParentModel> listOfData) {
-        TControl retObj = createTableControl(parentContainer, manager, listOfData);
+    public TControl createTable(Composite parentContainer) { // IContextModelManager
+                                                             // manager,
+        TControl retObj = createTableControl(parentContainer);
         retObj.setControl(retObj.getControl());
         return retObj;
     }
@@ -155,8 +159,7 @@ public class ContextTreeTable {
      * @param data
      * @return
      */
-    private TControl createTableControl(Composite parent, final IContextModelManager manager,
-            List<ContextTableTabParentModel> listOfData) {
+    private TControl createTableControl(Composite parent) {
         ConfigRegistry configRegistry = new ConfigRegistry();
         ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         configRegistry.registerConfigAttribute(SortConfigAttributes.SORT_COMPARATOR, new DefaultComparator());
@@ -165,7 +168,7 @@ public class ContextTreeTable {
         // the data source for the context
         if (propertyNames.length > 0) {
             treeNodes.clear();
-            contructContextTrees(manager, listOfData);
+            constructContextTreeNodes();
             EventList<ContextTreeNode> eventList = GlazedLists.eventList(treeNodes.values());
             SortedList<ContextTreeNode> sortedList = new SortedList<ContextTreeNode>(eventList, null);
             // init Column header layer
@@ -331,6 +334,13 @@ public class ContextTreeTable {
             return retObj;
         }
         return null;
+    }
+
+    private void constructContextTreeNodes() {
+        List<IContext> contextList = getContexts(manager.getContextManager());
+        List<IContextParameter> contextDatas = ContextTemplateComposite.computeContextTemplate(contextList);
+        List<ContextTableTabParentModel> listofData = ContextNatTableUtils.constructContextDatas(contextDatas);
+        contructContextTrees(listofData);
     }
 
     private List<Integer> getAllCheckPosBehaviour(IContextModelManager manager, ColumnGroupModel contextGroupModel) {
@@ -652,7 +662,7 @@ public class ContextTreeTable {
         }
     }
 
-    private void contructContextTrees(IContextModelManager manager, List<ContextTableTabParentModel> listOfData) {
+    private void contructContextTrees(List<ContextTableTabParentModel> listOfData) {
         if (listOfData.size() > 0) {
             for (ContextTableTabParentModel contextModel : listOfData) {
                 if (contextModel.hasChildren()) {
