@@ -89,6 +89,7 @@ import org.talend.core.ui.context.model.table.ContextTableConstants;
 import org.talend.core.ui.context.model.table.ContextTableTabParentModel;
 import org.talend.core.ui.context.nattableTree.ContextNatTableBackGroudPainter;
 import org.talend.core.ui.context.nattableTree.ContextNatTableConfiguration;
+import org.talend.core.ui.context.nattableTree.ContextParaModeChangeMenuConfiguration;
 import org.talend.core.ui.context.nattableTree.ContextRowDataListFixture;
 import org.talend.core.ui.context.nattableTree.ContextTextPainter;
 import org.talend.core.ui.context.nattableTree.ExtendedContextColumnPropertyAccessor;
@@ -242,6 +243,8 @@ public class ContextTreeTable {
             natTable.setConfigRegistry(configRegistry);
 
             addCustomStylingBehaviour(bodyDataProvider, columnGroupModel, manager.getContextManager());
+
+            addCustomContextMenuBehavior(bodyDataProvider);
 
             natTable.addConfiguration(new DefaultTreeLayerConfiguration(treeLayer));
 
@@ -424,8 +427,10 @@ public class ContextTreeTable {
 
         // add configuration for the context columns to do the column edit,color,style,etc.
         natTable.addConfiguration(new ContextNatTableConfiguration(bodyDataProvider, groupModel, manager));
+    }
 
-        // natTable.addConfiguration(new ContextSelectBindings());
+    private void addCustomContextMenuBehavior(final GlazedListsDataProvider<ContextTreeNode> bodyDataProvider) {
+        natTable.addConfiguration(new ContextParaModeChangeMenuConfiguration(natTable, bodyDataProvider));
     }
 
     private void addCustomSelectionBehaviour(final IContextModelManager manager, final ColumnGroupModel contextGroupModel,

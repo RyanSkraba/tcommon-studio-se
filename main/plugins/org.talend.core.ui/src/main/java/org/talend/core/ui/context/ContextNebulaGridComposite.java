@@ -66,6 +66,7 @@ import org.talend.core.model.process.IContext;
 import org.talend.core.model.process.IContextManager;
 import org.talend.core.model.process.IContextParameter;
 import org.talend.core.model.properties.ContextItem;
+import org.talend.core.model.properties.Item;
 import org.talend.core.model.properties.Project;
 import org.talend.core.model.utils.ContextParameterUtils;
 import org.talend.core.prefs.ITalendCorePrefConstants;
@@ -711,19 +712,6 @@ public class ContextNebulaGridComposite extends AbstractContextTabEditComposite 
         contextTableComp.getParent().layout();
         contextTableComp.layout();
         treeTable.refresh();
-
-        // if (propertyResized) {
-        // try {
-        // removeListener(SWT.Resize, resizeListener);
-        // contextTableComp.getParent().layout();
-        //
-        // contextTableComp.pack();
-        // propertyResized = false;
-        // addListener(SWT.Resize, resizeListener);
-        // } catch (Exception e) {
-        // }
-        //
-        // }
     }
 
     public int getLastCompositeSize() {
@@ -810,7 +798,8 @@ public class ContextNebulaGridComposite extends AbstractContextTabEditComposite 
                             firstLevelNode = new ContextTableTabParentModel();
                             output.add(firstLevelNode);
                             String sourceLabel = sourceId;
-                            ContextItem contextItem = ContextUtils.getContextItemById2(sourceId);
+                            // the item maybe a joblet item now
+                            Item contextItem = ContextUtils.getContextItemById3(sourceId);
                             if (contextItem != null) {
                                 sourceLabel = contextItem.getProperty().getLabel();
                                 final ProjectManager pm = ProjectManager.getInstance();
@@ -821,6 +810,17 @@ public class ContextNebulaGridComposite extends AbstractContextTabEditComposite 
                                     }
                                 }
                             }
+                            // else {
+                            // JobletProcessItem jobletItem = ContextUtils.getJobletContextItemById2(sourceId);
+                            // sourceLabel = jobletItem.getProperty().getLabel();
+                            // final ProjectManager pm = ProjectManager.getInstance();
+                            // if (!pm.isInCurrentMainProject(contextItem)) {
+                            // final Project project = pm.getProject(jobletItem);
+                            // if (project != null) {
+                            // firstLevelNode.setProjectLabel(project.getLabel());
+                            // }
+                            // }
+                            // }
                             firstLevelNode.setSourceName(sourceLabel);
                             firstLevelNode.setOrder(i);
                             firstLevelNode.setSourceId(sourceId);
