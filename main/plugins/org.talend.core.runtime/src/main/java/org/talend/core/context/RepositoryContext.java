@@ -26,6 +26,10 @@ import org.talend.core.model.properties.User;
  */
 public class RepositoryContext {
 
+    public static final String STATUS_SWITCHING_BRANCH = "STATUS_SWITCHING_BRANCH"; //$NON-NLS-1$
+
+    public static final String STATUS_NORMAL = "STATUS_NORMAL"; //$NON-NLS-1$
+
     private User user;
 
     private Project project;
@@ -39,6 +43,8 @@ public class RepositoryContext {
     private boolean editableAsReadOnly = false;
 
     private Map<String, String> fields;
+
+    private String repositoryStatus = STATUS_NORMAL;
 
     /**
      * DOC smallet RepositoryContext constructor comment.
@@ -75,6 +81,14 @@ public class RepositoryContext {
         if (oldAuthentification != null) {
             this.user.setAuthenticationInfo(oldAuthentification);
         }
+    }
+
+    public void setRespositoryStatus(String status) {
+        this.repositoryStatus = status;
+    }
+
+    public String getRespositoryStatus() {
+        return this.repositoryStatus;
     }
 
     /**
