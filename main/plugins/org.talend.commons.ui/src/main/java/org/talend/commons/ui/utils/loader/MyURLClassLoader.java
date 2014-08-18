@@ -32,6 +32,13 @@ import org.talend.commons.ui.runtime.exception.ExceptionHandler;
  */
 public class MyURLClassLoader extends URLClassLoader {
 
+    public static interface IAssignableClassFilter {
+
+        public boolean filter(URL[] urls);
+
+        public boolean filter(Class clazz);
+    }
+
     private static Logger log = Logger.getLogger(MyURLClassLoader.class);
 
     private Map pclasses = new HashMap();
@@ -52,12 +59,18 @@ public class MyURLClassLoader extends URLClassLoader {
         super(urls, parentLoader);
     }
 
-    @SuppressWarnings("unchecked")//$NON-NLS-1$
     public Class[] getAssignableClasses(Class type) throws IOException {
+        return getAssignableClasses(type, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class[] getAssignableClasses(Class type, IAssignableClassFilter filter) throws IOException {
         List classes = new ArrayList();
         URL[] urls = getURLs();
-        for (int i = 0; i < urls.length; ++i) {
-            URL url = urls[i];
+        for (URL url : urls) {
+            if (filter != null && filter.filter(new URL[] { url })) {
+                continue;
+            }
             File file = new File(url.getFile());
             if (!file.isDirectory() && file.exists() && file.canRead()) {
                 ZipFile zipFile = null;
@@ -79,7 +92,10 @@ public class MyURLClassLoader extends URLClassLoader {
                             log.warn(th);
                         }
                         if (cls != null) {
-                            if (type.isAssignableFrom(cls)) {
+                            if (filter != null && filter.filter(cls)) {
+                                continue;
+                            }
+                            if (isAssignableType(type, cls)) {
                                 classes.add(cls);
                             }
                         }
@@ -90,12 +106,46 @@ public class MyURLClassLoader extends URLClassLoader {
         return (Class[]) classes.toArray(new Class[classes.size()]);
     }
 
+    @SuppressWarnings("unchecked")
+    private boolean isAssignableType(Class type, Class current) {
+        if (type == null || current == null || current.equals(Object.class)) {
+            return false;
+        }
+
+        if (type.isAssignableFrom(current)) {
+            return true;
+        } else
+        // sometimes can not assign the java generic, use the class url
+        if (type.getName() != null && type.getName().equals(current.getName())) {
+            return true;
+        } else {
+            //
+            if (type.isInterface()) {//
+                for (Class interfaceClazz : current.getInterfaces()) {
+                    if (interfaceClazz.equals(type)) {
+                        return true;
+                    } else {
+                        if (isAssignableType(type, interfaceClazz)) {
+                            return true;
+                        }
+                    }
+                }
+                if (isAssignableType(type, current.getSuperclass())) {
+                    return true;
+                }
+            } else {
+                return isAssignableType(type, current.getSuperclass());
+            }
+        }
+        return false;
+    }
+
     /*
      * (non-Javadoc)
      * 
      * @see java.net.URLClassLoader#findClass(java.lang.String)
      */
-    @SuppressWarnings("unchecked")//$NON-NLS-1$
+    @SuppressWarnings("unchecked")
     protected synchronized Class findCslass(String className) throws ClassNotFoundException {
         Class cls = (Class) pclasses.get(className);
         if (cls == null) {
