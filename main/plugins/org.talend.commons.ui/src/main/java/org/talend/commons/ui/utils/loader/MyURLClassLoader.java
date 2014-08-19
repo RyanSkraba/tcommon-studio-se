@@ -37,6 +37,8 @@ public class MyURLClassLoader extends URLClassLoader {
         public boolean filter(URL[] urls);
 
         public boolean filter(Class clazz);
+
+        public boolean filter(String clazzName);
     }
 
     private static Logger log = Logger.getLogger(MyURLClassLoader.class);
@@ -85,7 +87,9 @@ public class MyURLClassLoader extends URLClassLoader {
                     String entryName = entries.nextElement().getName();
                     String className = changeFileNameToClassName(entryName);
                     if (className != null) {
-
+                        if (filter != null && filter.filter(className)) {
+                            continue;
+                        }
                         try {
                             cls = loadClass(className);
                         } catch (Throwable th) {
