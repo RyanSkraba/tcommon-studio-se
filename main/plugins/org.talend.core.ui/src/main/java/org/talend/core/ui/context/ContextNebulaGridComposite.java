@@ -166,7 +166,7 @@ public class ContextNebulaGridComposite extends AbstractContextTabEditComposite 
         contextTableComp.setLayoutData(gridData);
         treeTable = new ContextTreeTable(modelManager);
 
-        createNatTable();// new ArrayList<ContextTableTabParentModel>()
+        createNatTable();
 
         final Composite buttonsComposite = new Composite(this, SWT.NONE);
         buttonsComposite.setLayout(GridLayoutFactory.swtDefaults().spacing(0, 0).margins(0, 0).numColumns(7).create());
@@ -219,7 +219,7 @@ public class ContextNebulaGridComposite extends AbstractContextTabEditComposite 
         subPanel.setLayoutData(layoutDataFillBoth);
         subPanel.setLayout(new GridLayout());
 
-        ContextTreeTable.TControl tControl = treeTable.createTable(subPanel);// modelManager,
+        ContextTreeTable.TControl tControl = treeTable.createTable(subPanel);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(tControl.getControl());
 
         panel.setContent(subPanel);
